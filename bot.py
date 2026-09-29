@@ -1,6 +1,11 @@
-import os
+import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+
+# Configurar logging para ver el estado en Render
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 
 TOKEN = "1264699838:AAHdDTIKFEBqz281xKi55oYalIvO_mGc5z8"
 
@@ -44,15 +49,16 @@ async def fotoidentificacion(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.message.reply_text(texto)
 
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    # Construir la aplicación para la versión 20+
+    application = ApplicationBuilder().token(TOKEN).build()
 
-    app.add_handler(CommandHandler("reglas", reglas))
-    app.add_handler(CommandHandler("normativa", normativa))
-    app.add_handler(CommandHandler("ballenafranca", ballenafranca))
-    app.add_handler(CommandHandler("fotoidentificacion", fotoidentificacion))
+    application.add_handler(CommandHandler("reglas", reglas))
+    application.add_handler(CommandHandler("normativa", normativa))
+    application.add_handler(CommandHandler("ballenafranca", ballenafranca))
+    application.add_handler(CommandHandler("fotoidentificacion", fotoidentificacion))
 
     print("El bot esta en marcha y esperando comandos!")
-    app.run_polling()
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
