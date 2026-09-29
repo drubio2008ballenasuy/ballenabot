@@ -1,4 +1,7 @@
+import os
 import logging
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
@@ -8,6 +11,18 @@ logging.basicConfig(
 )
 
 TOKEN = "1264699838:AAHdDTIKFEBqz281xKi55oYalIvO_mGc5z8"
+
+# Mini servidor web para satisfacer el requisito de Render en servicios web
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Ballenas UY Bot is alive!")
+
+def run_http_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), SimpleHandler)
+    server.serve_forever()
 
 async def reglas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     texto = (
@@ -49,7 +64,11 @@ async def fotoidentificacion(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.message.reply_text(texto)
 
 def main():
-    # Construir la aplicación para la versión 20+
+    # Iniciar el servidor web en segundo plano para cumplir con Render
+    t = threading.Thread(target=run_http_server, daemon=True)
+    t.start()
+
+    # Construir la aplicación del bot
     application = ApplicationBuilder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("reglas", reglas))
